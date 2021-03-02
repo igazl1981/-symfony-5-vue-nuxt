@@ -1,0 +1,3 @@
+index:
+    path: /api/message
+    controller: App\Controller\MessageController::message
