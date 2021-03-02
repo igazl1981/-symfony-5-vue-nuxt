@@ -159,4 +159,31 @@ The response will set the Cookie with the name `BEARER`.
 
 ### Nuxt
 
+Need to install authentication module with `npm i @nuxtjs/auth-next` which requires an `index.js` file in the [store](./webapp/store) folder because the store has to be activated when installing auth module.
+
+The following setting is added to the [nuxt.config.js](./webapp/nuxt.config.js) which configures a `local` strategy:
+
+```
+auth: {
+    strategies: {
+      local: {
+        tokenRequired: false,
+        endpoints: {
+          login: { url: '/api/login_check', method: 'post', propertyName: 'token' },
+          logout: false,
+          user: { url: '/api/secure/user', method: 'get', propertyName: false},
+        }
+      }
+    }
+}
+```
+
+Note the **tokenRequired** propert that is required to prevent nuxt-auth from storing the token in Cookie.
+
+The token will be stored in the Cookie with the name `BEARER`.
+
+The **user**'s option contains the `propertyName: false` to let the auth module use the whole response as a user object. Otherwise it would use a specific field from the response or in case of unset then it doesn't use the user at all.
+
+
+
 

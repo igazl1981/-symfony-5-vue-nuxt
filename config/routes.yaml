@@ -6,5 +6,9 @@ secure_message:
     path: /api/secure/message
     controller: App\Controller\SecureMessageController::message
 
+secure_user:
+    path: /api/secure/user
+    controller: App\Controller\UserController::user
+
 api_login_check:
     path: /api/login_check

@@ -18,7 +18,9 @@ export default {
   css: [],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: [],
+  plugins: [
+    './plugins/axios'
+  ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
@@ -26,9 +28,9 @@ export default {
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
   buildModules: [
     // https://go.nuxtjs.dev/eslint
-    '@nuxtjs/eslint-module',
+    // '@nuxtjs/eslint-module',
     // https://go.nuxtjs.dev/stylelint
-    '@nuxtjs/stylelint-module',
+    // '@nuxtjs/stylelint-module',
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
@@ -37,6 +39,7 @@ export default {
     'bootstrap-vue/nuxt',
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
+    '@nuxtjs/auth',
     '@nuxtjs/proxy',
   ],
 
@@ -47,4 +50,31 @@ export default {
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {},
+
+  auth: {
+    strategies: {
+      local: {
+        tokenRequired: false,
+        endpoints: {
+          login: { url: '/api/login_check', method: 'post', propertyName: 'token' },
+          logout: false,
+          user: { url: '/api/secure/user', method: 'get', propertyName: false},
+        },
+      },
+      // The cookie strategie exists in nuxt/auth-next
+      // Got problem with auth-next
+      //    user is not fetched after login 200 response
+      //    loggedIn is not changed to true after login 200 response
+      // cookie: {
+      //   endpoints: {
+      //     login: { url: '/api/login_check', method: 'post', propertyName: 'token', headers: { 'Content-Type': 'application/json' } },
+      //     logout: false,
+      //     user: { url: '/api/secure/user', method: 'get', propertyName: 'username'},
+      //   },
+      //   cookie: {
+      //     name: "BEARER"
+      //   }
+      // },
+    }
+  }
 }

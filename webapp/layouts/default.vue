@@ -1,6 +1,7 @@
 <template>
-  <div>
-    <Nuxt />
+  <div class="container my-container">
+    <navigation-top />
+    <nuxt />
   </div>
 </template>
 
@@ -15,6 +16,12 @@ html {
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
   box-sizing: border-box;
+}
+
+.my-container {
+  margin: 0 auto;
+  min-height: 100vh;
+  align-items: center;
 }
 
 *,
