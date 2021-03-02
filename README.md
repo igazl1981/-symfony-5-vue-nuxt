@@ -56,6 +56,8 @@ When entities are ready use `bin/console  make:migration` which will create a fi
 
 Then the migration can be done to update the database: `bin/console  doctrine:migrations:migrate`.
 
+If the database is `mariadb` the `DATABASE_URL` has to contain the `serverVersion=mariadb-10.5.9`. Note the **mariadb** in the `serverVersion`.
+
 ### Webapp
 
 The webapp got some example pages to represent auto route feature. 
@@ -64,6 +66,97 @@ There is a `fetch` part in the [more example](./webapp/pages/more/index.vue) fil
 
 # Security 
 
+## Symfony
+
 Here are the security setup steps to have JSON login and some protected urls.
+
+Add 2 entries to the security.yaml file under `security.firewalls`:
+* login
+* api
+
+The `login` contains the setup for lexik's login while the `api` will set up security for the `/api/secure` endpoints.
+
+If more info is required into the response of the login endpoint checkout [Lexik's github](https://github.com/lexik/LexikJWTAuthenticationBundle/blob/master/Resources/doc/2-data-customization.md#eventsauthentication_success---adding-public-data-to-the-jwt-response).
+
+Add the path to the `access_control` part: 
+
+`- { path: ^/api/secure, roles: ROLE_USER }`
+
+or 
+
+`- { path: ^/api/secure, roles: IS_AUTHENTICATED_FULLY }`
+
+If the whole `/api` is secure the login endpoint has to be accessible for anonymous:
+
+```yaml
+access_control:
+  - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+  - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
+```
+
+To be able to reach the login endpoint the route has to be added to the [routes.yaml](./config/routes.yaml):
+
+```yaml
+api_login_check:
+  path: /api/login_check
+```
+
+### Adding a user to the DB
+
+First, generate an encoded password for the user: `bin/console security:encode-password`, then insert the user into the database:
+
+The generated password is: 12345
+
+```sql
+INSERT INTO symfony.user (email, roles, password) VALUES ('test@email.com', '', '$argon2id$v=19$m=65536,t=4,p=1$gm3k26JIuddTuwIt2/oCmQ$pwpJFtmolNDqKwh2Vj2v/7ljogDM1LR2MYmsYK5xyTw')
+```
+
+Currently, Symfony's default encoder is `sodium` which does not require a `salt`.
+
+### Checking login
+
+When the user is inserted the following curl should return the token:
+
+```
+curl --request POST \
+  --url http://localhost/api/login_check \
+  --header 'Content-Type: application/json' \
+  --data '{
+	"username": "test@email.com",
+	"password": "12345"
+  }'
+```
+
+Response: 
+```json
+{
+  "token": "..."
+}
+```
+
+### Setting login to use Cookie
+
+For setting up Lexik to use the Cookie to store the token the `token_extractors` has to be updated like:
+
+```yaml
+token_extractors:
+    authorization_header:
+        enabled: false
+    cookie:
+        enabled: true
+        name: 'BEARER'
+```
+
+A Listener has to be added which will listen on `lexik_jwt_authentication.on_authentication_success`.
+
+The class is: [AuthenticationSuccessListener.php](./src/Listener/AuthenticationSuccessListener.php) and the listener has to be configured in the [services.yaml](./config/services.yaml)
+
+The will add the Cookie to the response with the TTL that comes from the Lexik configuration.
+
+For the same login request the response will be empty. The listener removes it, which is not necessary if you would like to send user data on login. However nuxt/auth will not use that by default and will call for the profile endpoint to get the user data.
+
+The response will set the Cookie with the name `BEARER`.
+
+### Nuxt
 
 

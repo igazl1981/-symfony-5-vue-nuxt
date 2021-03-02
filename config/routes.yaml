@@ -1,3 +1,10 @@
-index:
+message:
     path: /api/message
     controller: App\Controller\MessageController::message
+
+secure_message:
+    path: /api/secure/message
+    controller: App\Controller\SecureMessageController::message
+
+api_login_check:
+    path: /api/login_check
